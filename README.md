@@ -15,6 +15,8 @@ docker-compose up
 
 This should have created the webapp for you to explore and access it at `http://localhost:8501`.
 
+The password for the web app is `josumsc2023`, but can be modified by changing the contents of `/.streamlit/secrets.toml` as stated in Streamlit documentation.
+
 Changes should be reflected in the web app automatically thanks to the volumes of the `docker-compose.yml` file.
 
 To stop the app, you can use `Ctrl+C` or `docker-compose down` in case you are running it on daemon mode.
