@@ -3,6 +3,7 @@ from scipy.special import softmax
 import csv
 import urllib.request
 import numpy as np
+import pandas as pd
 from transformers import AutoModelForSequenceClassification
 from transformers import AutoTokenizer
 
@@ -86,7 +87,5 @@ def get_results(text, tokenizer, model, labels):
 
     st.write("Results for your tweet:")
 
-    for i in range(scores.shape[0]):
-        l = labels[ranking[i]]
-        s = scores[ranking[i]]
-        st.write(f"{i+1}) {l} {np.round(float(s), 4)}")
+    result_df = pd.DataFrame(zip(labels, scores), columns=['Label', 'Score'])
+    st.table(result_df.sort_values(by='Score', ascending=False).reset_index(drop=True))
