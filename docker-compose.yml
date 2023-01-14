@@ -7,5 +7,6 @@ services:
     volumes:
       - ./src:/app
       - ./requirements.txt:/app/requirements.txt
+      - ./.env:/app/.env
       - ./.streamlit:/app/.streamlit
     restart: always
