@@ -58,6 +58,7 @@ def preprocess(text):
 
 
 def predict(text, tokenizer, model):
+    """Predict the score of the labels for the given text."""
     preprocessed_text = preprocess(text)
     encoded_input = tokenizer(preprocessed_text, return_tensors='pt')
 
@@ -78,6 +79,7 @@ def load_model(task, model_name):
 
 
 def get_results(text, tokenizer, model, labels):
+    """Writes in our webapp the results obtained from the model."""
     scores = predict(text, tokenizer, model)
     ranking = np.argsort(scores)
     ranking = ranking[::-1]
