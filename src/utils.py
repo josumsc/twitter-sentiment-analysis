@@ -146,11 +146,11 @@ def summarize_tweet_profiling(username, results_df):
     with st.container():
         columns = st.columns(2)
         with columns[0]:
-            st.write("### Sentiment distribution:")
+            st.write("### Count of Tweets per Sentiment:")
             st.plotly_chart(px.pie(results_df, names='Sentiment').update_layout(showlegend=False))
         
         with columns[1]:
-            st.write("### Sentiment distribution:")
+            st.write("### Sentiment Scoring Distribution:")
             st.plotly_chart(
                 px.box(
                     pd.melt(results_df.drop('Tweet', axis=1)), x='variable', y='value', color='variable', points='outliers'
