@@ -2,6 +2,9 @@ import streamlit as st
 from scipy.special import softmax
 import csv
 import urllib.request
+import numpy as np
+from transformers import AutoModelForSequenceClassification
+from transformers import AutoTokenizer
 
 
 def check_password():
@@ -34,17 +37,18 @@ def check_password():
 
 
 def get_labels(task):
-    # download label mapping
+    """Download the labels for a given task from the TweetEval repository."""
     labels=[]
     mapping_link = f"https://raw.githubusercontent.com/cardiffnlp/tweeteval/main/datasets/{task}/mapping.txt"
     with urllib.request.urlopen(mapping_link) as f:
         html = f.read().decode('utf-8').split("\n")
         csvreader = csv.reader(html, delimiter='\t')
     labels = [row[1] for row in csvreader if len(row) > 1]
+    return labels
 
 
-
-def _preprocess(text):
+def preprocess(text):
+    """Preprocess the text to be classified."""
     new_text = []
     for t in text.split(" "):
         t = '@user' if t.startswith('@') and len(t) > 1 else t
@@ -54,10 +58,33 @@ def _preprocess(text):
 
 
 def predict(text, tokenizer, model):
-    preprocessed_text = _preprocess(text)
-    encoded_input = tokenizer(text, return_tensors='pt')
+    preprocessed_text = preprocess(text)
+    encoded_input = tokenizer(preprocessed_text, return_tensors='pt')
 
     output = model(**encoded_input)
     scores = output[0][0].detach().numpy()
     scores = softmax(scores)
     return scores
+
+
+@st.experimental_singleton(show_spinner=False)
+def load_model(task, model_name):
+    """Retrieves the model from Hugging Face's model hub and loads it into memory."""
+    with st.spinner("Loading Model Into Memory..."):
+        labels = get_labels(task)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForSequenceClassification.from_pretrained(model_name)
+    return tokenizer, model, labels
+
+
+def get_results(text, tokenizer, model, labels):
+    scores = predict(text, tokenizer, model)
+    ranking = np.argsort(scores)
+    ranking = ranking[::-1]
+
+    st.write("Results for your tweet:")
+
+    for i in range(scores.shape[0]):
+        l = labels[ranking[i]]
+        s = scores[ranking[i]]
+        st.write(f"{i+1}) {l} {np.round(float(s), 4)}")
